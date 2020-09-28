@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"io"
 	"net"
 	"time"
@@ -15,7 +16,7 @@ const (
 	headerLen = 10
 )
 
-func handleRecvPkg(conn net.Conn, store Connector) {
+func handleRecvPkg(conn net.Conn, store RabbitMQConnector) {
 	var (
 		isPkgSave         bool
 		srResultCodePkg   []byte
@@ -24,11 +25,11 @@ func handleRecvPkg(conn net.Conn, store Connector) {
 		recvPacket        []byte
 	)
 
-	if store == nil {
-		logger.Errorf("Не корректная ссылка на объект хранилища")
-		conn.Close()
-		return
-	}
+	//if store == nil {
+	//	logger.Errorf("Не корректная ссылка на объект хранилища")
+	//	conn.Close()
+	//	return
+	//}
 	logger.Warnf("Установлено соединение с %s", conn.RemoteAddr())
 
 	for {
@@ -231,8 +232,9 @@ func handleRecvPkg(conn net.Conn, store Connector) {
 				}
 
 				if isPkgSave {
+					jsonPkg, _ := json.MarshalIndent(exportPacket, "", "    ")
 					if err := store.Save(&exportPacket); err != nil {
-						logger.Error(err)
+						logger.Error(err, string(jsonPkg))
 					}
 				}
 			}

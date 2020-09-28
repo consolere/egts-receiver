@@ -1,11 +1,9 @@
 package main
 
 import (
+	"github.com/labstack/gommon/log"
 	"net"
 	"os"
-	"plugin"
-
-	"github.com/labstack/gommon/log"
 )
 
 var (
@@ -15,7 +13,7 @@ var (
 
 func main() {
 	var (
-		store Connector
+		store RabbitMQConnector
 	)
 	logger = log.New("-")
 	logger.SetHeader("${time_rfc3339_nano} ${short_file}:${line} ${level} -${message}")
@@ -29,21 +27,7 @@ func main() {
 	}
 	logger.SetLevel(config.getLogLevel())
 
-	if config.Store != nil {
-		plug, err := plugin.Open(config.Store["plugin"])
-		if err != nil {
-			logger.Fatalf("Не удалость загрузить плагин хранилища: %v", err)
-		}
-
-		connector, err := plug.Lookup("Connector")
-		if err != nil {
-			logger.Fatalf("Не удалось загрузить коннектор: %v", err)
-		}
-
-		store = connector.(Connector)
-	} else {
-		store = defaultConnector{}
-	}
+	store = RabbitMQConnector{}
 
 	if err := store.Init(config.Store); err != nil {
 		logger.Fatal(err)
@@ -53,7 +37,7 @@ func main() {
 	runServer(config.getListenAddress(), store)
 }
 
-func runServer(srvAddress string, store Connector) {
+func runServer(srvAddress string, store RabbitMQConnector) {
 	l, err := net.Listen("tcp", srvAddress)
 	if err != nil {
 		logger.Fatalf("Не удалось открыть соединение: %v", err)

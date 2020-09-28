@@ -29,3 +29,5 @@ bin/
 .vscode/launch.json
 cmd/receiver/debug
 .vscode/sftp.json
+!/build/bin/receiver
+!/configs/receiver-test.toml

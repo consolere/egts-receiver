@@ -1,7 +1,7 @@
 package main
 
 //Connector интерфейс для подключения внешних хранилищ
-type Connector interface {
+type Connector0 interface {
 	// установка соединения с хранилищем
 	Init(map[string]string) error
 
